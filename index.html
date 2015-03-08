@@ -1,41 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset='utf-8'>
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
     <title>Organon by maximozsec</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Organon</h1>
+        <p class="header">This program focuses on automating the download, installation and compilation of pentest tools from source</p>
 
-    <header>
-      <div class="container">
-        <h1>Organon</h1>
-        <h2>This program focuses on automating the download, installation and compilation of pentest tools from source</h2>
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/maximozsec/organon/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/maximozsec/organon/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/maximozsec/organon">View On GitHub</a></li>
+        </ul>
 
-        <section id="downloads">
-          <a href="https://github.com/maximozsec/organon/zipball/master" class="btn">Download as .zip</a>
-          <a href="https://github.com/maximozsec/organon/tarball/master" class="btn">Download as .tar.gz</a>
-          <a href="https://github.com/maximozsec/organon" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
-        </section>
-      </div>
-    </header>
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/maximozsec">maximozsec</a></p>
 
-    <div class="container">
-      <section id="main_content">
-        <pre><code>████▄ █▄▄▄▄   ▄▀  ██      ▄   ████▄    ▄   
-█   █ █  ▄▀ ▄▀    █ █      █  █   █     █  
-█   █ █▀▀▌  █ ▀▄  █▄▄█ ██   █ █   █ ██   █ 
-▀████ █  █  █   █ █  █ █ █  █ ▀████ █ █  █ 
-        █    ███     █ █  █ █       █  █ █ 
-       ▀            █  █   ██       █   ██ 
-                   ▀                       
-</code></pre>
+
+      </header>
+      <section>
+        <p><img src="https://i.imgur.com/VvoUkMP.jpg" alt="Image of organon"></p>
 
 <p>This program focuses on automating the download, installation and compilation of pentest tools from source</p>
 
@@ -57,12 +52,13 @@ Tool developed for Debian systems (apt)</p>
 <a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h2>
 
 <ol>
-<li>python<br>
+<li>Python &gt;=2.7 or &gt;=3.4<br>
 </li>
-<li>ruby<br>
+<li>Ruby &gt;=2.0</li>
+<li><a href="http://bundler.io/"><strong>bundler</strong></a></li>
+<li>
+<strong>Gems</strong>: <a href="https://rubygems.org/gems/mysql">mysql</a>, <a href="https://rubygems.org/gems/colorize">colorize</a>
 </li>
-<li>ruby Mysql</li>
-<li>rubygems</li>
 <li>GNU/Linux system based on Debian</li>
 </ol>
 
@@ -71,8 +67,18 @@ Tool developed for Debian systems (apt)</p>
 
 <pre><code>git clone https://github.com/maximozsec/organon.git
 cd organon
-sudo ./install.sh
+./install.sh
 </code></pre>
+
+<h2>
+<a id="tested-on" class="anchor" href="#tested-on" aria-hidden="true"><span class="octicon octicon-link"></span></a>Tested on:</h2>
+
+<ul>
+<li>Ubuntu 14.04 x86_64</li>
+<li>Ubuntu 14.10 x86_64</li>
+<li>Debian 7.8 Wheezy</li>
+<li>Elementary OS Luna</li>
+</ul>
 
 <h2>
 <a id="bugs" class="anchor" href="#bugs" aria-hidden="true"><span class="octicon octicon-link"></span></a>BUGS</h2>
@@ -84,9 +90,48 @@ sudo ./install.sh
 <li>fb.com/maxsecur1ty</li>
 <li>fb.com/cienciahacker</li>
 </ul>
-      </section>
-    </div>
 
-    
+<h2>
+<a id="about-current-version" class="anchor" href="#about-current-version" aria-hidden="true"><span class="octicon octicon-link"></span></a>About current version</h2>
+
+<h5>
+<a id="v017-beta" class="anchor" href="#v017-beta" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>v0.1.7-beta</code>
+</h5>
+
+<ul>
+<li>
+<p><strong>Goal</strong></p>
+
+<ul>
+<li>Install tools and its dependences from a MySQL database</li>
+</ul>
+</li>
+<li>
+<p><strong>MySQL</strong></p>
+
+<ul>
+<li>Server version: 5.5.41-0+wheezy1 (Debian)</li>
+</ul>
+</li>
+<li><p>Ruby code to connect to the database</p></li>
+<li><p>Python script to execute the SQL commands and run the program</p></li>
+</ul>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		          <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-60501543-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
   </body>
 </html>
