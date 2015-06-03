@@ -6,7 +6,7 @@
     <title>Organon by maximozsec</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
     <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
@@ -44,8 +44,8 @@ Tool developed for Debian systems (apt)</p>
 <a id="authors" class="anchor" href="#authors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors:</h2>
 
 <ul>
-<li>Fnkoc</li>
-<li>Maximoz</li>
+<li><a href="https://github.com/fnk0c">Fnkoc</a></li>
+<li><a href="https://github.com/maximozsec">Maximoz</a></li>
 </ul>
 
 <h2>
@@ -54,10 +54,10 @@ Tool developed for Debian systems (apt)</p>
 <ol>
 <li>Python &gt;=2.7 or &gt;=3.4<br>
 </li>
-<li>Ruby &gt;=2.0</li>
+<li>Ruby &gt;=1.9</li>
 <li><a href="http://bundler.io/"><strong>bundler</strong></a></li>
 <li>
-<strong>Gems</strong>: <a href="https://rubygems.org/gems/mysql">mysql</a>, <a href="https://rubygems.org/gems/colorize">colorize</a>
+<strong>Gems</strong>: <a href="https://rubygems.org/gems/mysql">mysql</a>, <a href="https://rubygems.org/gems/colorize">colorize</a>, <a href="https://rubygems.org/gems/nokogiri">nokogiri</a>
 </li>
 <li>GNU/Linux system based on Debian</li>
 </ol>
@@ -77,8 +77,36 @@ cd organon
 <li>Ubuntu 14.04 x86_64</li>
 <li>Ubuntu 14.10 x86_64</li>
 <li>Debian 7.8 Wheezy</li>
+<li>Debian 8 Jessie</li>
 <li>Elementary OS Luna</li>
+<li>Linux Mint 17.1</li>
 </ul>
+
+<h2>
+<a id="screenshot" class="anchor" href="#screenshot" aria-hidden="true"><span class="octicon octicon-link"></span></a>Screenshot</h2>
+
+<p><img src="https://i.imgur.com/C4BvEh3.png" alt="Screenshot"></p>
+
+<h2>
+<a id="help" class="anchor" href="#help" aria-hidden="true"><span class="octicon octicon-link"></span></a>Help</h2>
+
+<pre><code>* Listing available tools  
+        organon -l  
+* Searching for tools  
+        organon -s &lt;package&gt;
+* Installing tool  
+        organon -i &lt;package&gt; &lt;package&gt;
+* Update Organon  
+        organon -u
+* Remove tool
+        organon -r &lt;package&gt; &lt;package&gt;  
+* Remove tool and its dependencies and configuration files
+        organon -r &lt;package&gt; &lt;package&gt; --dependencies --config  
+* Clean .cache directory
+        organon --clean 
+* Current Version
+        organon -v
+</code></pre>
 
 <h2>
 <a id="bugs" class="anchor" href="#bugs" aria-hidden="true"><span class="octicon octicon-link"></span></a>BUGS</h2>
@@ -92,7 +120,45 @@ cd organon
 </ul>
 
 <h2>
+<a id="be-part-of-development" class="anchor" href="#be-part-of-development" aria-hidden="true"><span class="octicon octicon-link"></span></a>Be Part of development</h2>
+
+<p>Send us a message on facebook</p>
+
+<h2>
 <a id="about-current-version" class="anchor" href="#about-current-version" aria-hidden="true"><span class="octicon octicon-link"></span></a>About current version</h2>
+
+<h4>
+<a id="v018-beta" class="anchor" href="#v018-beta" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>v0.1.8-beta</code>
+</h4>
+
+<ul>
+<li>
+<p><strong>Goal</strong></p>
+
+<ul>
+<li>Install tools and its dependences from a MySQL database</li>
+</ul>
+</li>
+<li>
+<p><strong>MySQL</strong></p>
+
+<ul>
+<li><p>Server version: 5.5.41-0+wheezy1 (Debian)</p></li>
+<li><p>Ruby code to connect to the database</p></li>
+<li><p>Python script to execute the SQL commands and run the program</p></li>
+</ul>
+</li>
+<li>
+<p><strong>PKGBUILD</strong></p>
+
+<ul>
+<li>The installation scripts were replaced by pkgconfig files, similar to pacman pkgbuild. These files are hosted on the organon server.</li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="about-previous-version" class="anchor" href="#about-previous-version" aria-hidden="true"><span class="octicon octicon-link"></span></a>About previous version</h2>
 
 <h5>
 <a id="v017-beta" class="anchor" href="#v017-beta" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>v0.1.7-beta</code>
@@ -118,7 +184,7 @@ cd organon
 </ul>
       </section>
       <footer>
-        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
       </footer>
     </div>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
