@@ -29,10 +29,9 @@ begin
 	require 'open-uri'
 	require 'net/http'
 rescue Interrupt
-	warn "You have interrupted the application."
+	warn "Interrupted"
 	exit 1
 end
-
 doc = Nokogiri::HTML(open("http://organon.ddns.net"))
 
 $server = doc.css('link')[0]['href'].gsub!("http://", "").gsub!(":1000/favicon.ico", "")
@@ -77,7 +76,7 @@ class Resp
 				end
 				
 				# Downloading the tool configuration file
-				pkgconf = Net::HTTP.get(URI "http://#{$server}:1000/organon/pkgconfig/debian/#{row[2]}.conf")
+				pkgconf = Net::HTTP.get(URI "http://#{$server}:1000/organon/pkgconfig/arch/#{row[2]}.conf")
 
 				File.open("#{row[2]}.conf", "w+") do |file|
 					file.write(pkgconf)
@@ -87,13 +86,13 @@ class Resp
 					puts "The following dependencies are necessary for this tool."
 					puts "(#{row[1].split.length}) #{row[1]}\n"
 					puts " [" + "!".red + "] Installing dependencies........"
-					system "sudo apt-get install #{row[1]} -y"      
+					system "sudo pacman -S #{row[1]} -y"      
 				else
 					puts "[" + "~".blue + "] No necessary dependence"
 				end
 			end
 		rescue Interrupt
-			warn "You have interrupted the labeling."
+			warn "Installation interrupted."
 			exit 1
 		end
 		result.free
@@ -114,15 +113,15 @@ class Resp
 TOOLS
 	  		end
 		rescue Interrupt
-			warn "You have interrupted the instalation."
+			warn "Labeling interrupted."
 			exit 1
 		end
 		result.free
 	end
 
-	def search(list_command) # Method to list tools
+	def search(search_command) # Method to search tools by using keywords
 		begin
-			result = $db.query(list_command)
+			result = $db.query(search_command)
 	   		result.each do |row| # Listing each row
 	     		puts <<TOOLS
 
@@ -131,9 +130,11 @@ TOOLS
 
 TOOLS
 	  		end
+			
+		puts " [!] ".red + "Not found" if result.num_rows == 0
+
 		rescue Interrupt
-			warn "You have interrupted the instalation."
-			exit 1
+			puts "Seek interrupted."
 		end
 		result.free
 	end
@@ -142,7 +143,7 @@ TOOLS
 		begin
 			result = $db.query(remove_command)
 			result.each do |row|
-				system "sudo apt-get remove #{row[0]}"
+				system "sudo pacman -R #{row[0]}"
 			end
 		rescue Interrupt
 			warn "Interrupted."
