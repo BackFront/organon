@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Organon - Wiki</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<link rel="stylesheet" href="../css/bootstrap.css">
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-7">
+				<img class="icon" src="../img/banner.jpg" alt="Organon Banner">
+			</div>
+			<div class="col-md-5 icon">
+				<nav class="navbar navbar-default">
+					<div class="container-fluid">
+						<div class="collapse navbar-collapse">
+							<ul class="nav navbar-nav list-unstyled list-inline">
+								<li><a href="../index.html">Home</a></li>
+								<li><a href="../install/install.html">How To Install</a></li>
+								<li><a href="wiki.html">Wiki</a></li>
+								<li><a href="../pkgconfig">PKGCONFIG</a></li>
+							</ul>
+						</div>
+					</div>
+				</nav>
+			</div>
+		</div><p/>
+
+		<div class="row">
+			<div class="col-md-6">
+				<h1>Contents</h1>
+				<ul class="list-unstyled">
+					<li><a href="#wtfOrganon">1. What is Organon?</a></li>
+					<ul>
+						<li><a href="#wtfDoes">1.1 What he does?</a></li>
+						<li><a href="#wtfUse">1.2 Why should I use it?</a></li>
+					</ul>
+					<li><a href="#howWorks">2. How it works?</a></li>
+					<ul>
+						<li><a href="#organonPy">2.1 Organon.py</a></li>
+						<li><a href="#organonDB">2.2 Database_connector.rb</a></li>
+						<li><a href="#organonInstall">2.3 Install.py</a></li>
+						<li><a href="#organonConfig">2.4 PKGCONFIG</a></li>
+						<li><a href="#commands">2.5 Commands</a></li>
+					</ul>
+				</ul>
+			</div>
+
+			<div class="col-md-6">
+				<a href=""><img class="cienciaH-banner" src="../img/cienciaHacker.jpg" alt="Ciência Hacker Banner"></a>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12">
+				<div class="jumbotron">
+					<h2 id="wtfOrganon">1. What is Organon?</h2>
+					<p class="text-justify">Organon is a Python and Ruby application designed to automate the open source tools build process.</p>
+					<h3 id="wtfDoes" class="alinhar bg-primary">1.1 What he does?</h3>
+					<p class="text-justify">Organon retrieves the source code, downloads all the necessary dependencies to compile, does the build and installation process.</p>
+					<h3 id="wtfUse" class="alinhar bg-primary">1.2 Why should I use it?</h3>
+					<p class="text-justify">Organon was made for beginners and / or lazy people who do not want to spend time correcting dependency problems when trying to build their tools. If you are new to GNU / Linux world, but want to try some tools PenTest and do not know how to install, Organon is for you! <br>
+
+
+					If you know Linux, like me, but not like using focused distros in pentest, Organon is for you!</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12">
+				<div class="jumbotron">
+					<h2 id="howWorks">2. How it works?</h2>
+					<p class="text-justify">Organon was built using Python and Ruby (Shell Script it’s just for the installation process). The Python scripts are responsible to do the most part of the job.</p>
+					<h3 id="organonPy" class="alinhar bg-primary">2.1 Organon.py</h3>
+					<p class="text-justify">This is the main script. That's because he's the one calling the other parts of the program. <br>
+					For example, it is responsible for retrieving user-arguments passed and then move on to other scripts.</p>
+					<h3 id="organonDB" class="alinhar bg-primary">2.2 Database_connector.rb</h3>
+					<p class="text-justify">
+					This script is responsible when we need to retrieve data from the database.<br>
+					It is called by organon.py and also receives a organon.py argument.
+					The argument is in fact SQL querys. As you can see below:</p>
+
+					<p class="text-justify">To list all applications:
+<code>
+<pre>
+SELECT nome, versao, descricao FROM arch;
+To install or remove an application:
+SELECT dependencias FROM archWHERE nome=”nmap”;
+To search for applications
+SELECT * FROM arch WHERE
+(CONVERT( nome USING utf8 )
+LIKE '%scanner%' OR
+CONVERT( versao USING utf8 )
+LIKE '%scanner%' OR
+CONVERT( url USING utf8 )
+LIKE '%scanner%' OR
+CONVERT( descricao USING utf8)
+LIKE '%scanner%' OR
+CONVERT( dependencias  USING utf8 )
+LIKE '%scanner%') LIMIT 0, 30"
+</pre>
+</code></p>
+
+<p class="alert alert-danger text-justify">* “Arch” is replaced by debian if you use a debian based system. <br>
+** “nmap” and “scanner” are just for exemple proposes.<br>
+
+Once the informations are given to database_connector.rb, it execute commands to download the source code and the PKGCONFIG.</p>
+
+				<h3 id="organonInstall" class="alinhar bg-primary">2.3 Install.py</h3>
+				<p class="text-justify">Install.py is the one who reads all the information stored on pkgconfig and makes the necessary actions. It also reads and stores the information in pkgconfig to generate the shell script used in the compilation and installation process.</p>
+
+				<h3 id="organonConfig" class="alinhar bg-primary">2.4 PKGCONFIG</h3>
+				<p class="text-justify">PKGCONFIG was inpired by PKGBUILD from pacman package manager. It contains many usefull informations such as:</p>
+
+				<code>
+					<pre>
+Package name
+Version
+Compilation Process
+Installation Process
+Package type
+
+Organon uses a MySQL database to store informations like:
+
+Name (nome)
+Version (versão)
+URL for download (url)
+Dependencies (dependências)
+Description (descrição)
+					</pre>
+				</code>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<h3 id="commands" class="alinhar bg-primary">2.5 Commands</h3>
+<code>	
+<pre>
+-h, --help show this help message and exit
+-a, --about About this tool
+-v, --version Show version and exit
+-i I [I ...] Install packages
+-r R [R ...] Remove packages
+--dependencies Remove dependencies (use with -r)
+--config Remove configuration files (use with -r)
+-u Update Organon
+-s S Search for package
+-l List all packages available
+--clean Clean Organon's cache
+</pre>
+</code>
+			</div>
+		</div>
+
+		<!-- Social Networks Footer-->
+		<div class="row">
+			<div class="col-md-12 alinhar fundo">	
+				<h3>Social Networks</h3>
+				<a href="https://www.facebook.com/CienciaHacker" target="_blank">
+				<img class="efeito-massa"src="../img/social/facebook.jpg" alt="Ciência Hacker Page" class="img-thumbnail">
+				</a>
+
+				<a href="https://twitter.com/cienciahacker" target="_blank">
+				<img class="efeito-massa"src="../img/social/twitter.jpg" alt="Ciência Hacker Twitter" class="img-thumbnail">
+				</a>
+
+				<a href="https://plus.google.com/+cienciahacker/" target="_blank">
+				<img class="efeito-massa"src="../img/social/googleplus.jpg" alt="Ciência Hacker Google+" class="img-thumbnail">
+				</a>
+
+				<a href="https://github.com/cienciahacker/index" target="_blank">
+				<img class="efeito-massa"src="../img/social/github.jpg" alt="Ciência Hacker GitHub" class="img-thumbnail"><p/>
+				</a>
+				
+				<p/>Copyright © 2015 <a href="http://cienciahacker.com.br/" target="_blank">Ciência Hacker</a>. <del>All Rights Reserved</del>. Opss!
+			</div>					
+		</div>	
+	</div>
+</body>
+</html>

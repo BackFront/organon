@@ -1,0 +1,41 @@
+.alinhar{ text-align: center; }
+
+.efeito-massa{
+    padding: 6px; 
+   	border: 4px solid #ffffff; 
+    border-radius: 30%; 
+    box-shadow: 3px 6px 8px 1px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 3px 6px 8px 1px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 3px 6px 8px 1px rgba(0, 0, 0, 0.3);
+}
+.fundo{ 
+	margin-top: 100px;
+    box-shadow: 20px -20px 1px 10px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.3);
+}
+.cienciaH-banner{
+	width: 70%;
+	height: auto;
+}
+
+img.print {
+    -webkit-filter: blur(10px);
+    filter: blur(10px);
+}
+
+img.print:hover { 
+    -webkit-filter: contrast(1);
+    filter: contrast(1);
+}
+
+img.retangular {  
+    -webkit-transition: 1s;  
+    -moz-transition: 1s;  
+    transition: 1s;  
+    -webkit-border-radius: 20px;  
+    -moz-border-radius: 20px;  
+    border-radius: 20px;  
+} 
+
+
