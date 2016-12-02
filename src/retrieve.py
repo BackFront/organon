@@ -5,7 +5,6 @@
 #https://github.com/fnk0c/organon
 
 __AUTHOR__ 	= "Fnkoc"
-__DATE__ = "05/11/2015"
 
 """
 	Copyright (C) 2015  Franco Colombino & Ygor Máximo
@@ -21,118 +20,209 @@ __DATE__ = "05/11/2015"
     GNU General Public License for more details.
 """
 
+from os import chdir
 from re import findall
 from subprocess import check_call, CalledProcessError
+
 from colors import *
 
 class download(object):
-	def __init__(self, pkg_name, distro, arch):
+	def __init__(self, pkg_name, distro, arch, ver3):
 		self.pkg_name = pkg_name
 		self.distro = distro
 		self.arch = arch
+		self.ver3 = ver3
 
 	def get_mirror(self):
+		#Opens /etc/organon/mirrors to get mirror address
 		with open("/etc/organon/mirrors", "r") as mirror:
 			mirror = mirror.readline()
 			mirror = mirror.replace("\n", "")
-	
-		self.src_mirror = mirror + "mirror/" + self.arch + "/"
-		self.pkg_mirror = mirror + "pkgconfig/" + self.distro + "/"
 
-	def get_files(self):
-		src = self.src_mirror + self.pkg_name + ".tar.gz"
+		self.mirror = mirror
+		self.pkg_mirror = mirror + "mirror/" + self.distro + "/" + self.arch + "/pkgconfig/"
+
+	def pkgconfig(self):
+		#Download source files of programs
+		
+		import database
+		
+		db = database.connect(self.ver3)
+		server_pkgname = db.server_pkgname(self.pkg_name)
+		
 		pkg = self.pkg_mirror + self.pkg_name + ".conf"
-		print(src)
-		print(pkg)
 
+		check_call("sudo wget -N -c -P /var/cache/organon %s" % pkg, shell = True)
+		return(server_pkgname)
+
+	def source(self, url):
+		if "github" in url:
+			command = "cd /var/cache/organon/ ; sudo git clone %s" % url
+		else:
+			command = "sudo wget -N -c -P /var/cache/organon %s" % url
 		try:
-			check_call("wget %s" % src, shell = True)
-		except (CalledProcessError, FileNotFoundError):
-			src = src.replace("x86_64", "any").replace("x86", "any")
-			check_call("wget %s" % src, shell = True)
+			check_call(command, shell = True)
+		except Exception as e:
+			pass
+
+	def sync(self):
+		#Sync local database with server's database
+		command = "sudo wget -N -P /etc/organon/ %smirror/%s/%s/tools.db" % (self.mirror, self.distro, self.arch)
+		check_call(command, shell = True)
+
 
 class install(object):
-	#Template used to do the install
-	script_template = \
-"""#!/bin/bash
+	def __init__(self, pkg_name, ver3):
+		self.pkg_name = pkg_name
+		self.ver3 = ver3
 
-#Copy organon to /usr/share
-cp -R .cache/organon /usr/share/
+	def read(self):
+		with open("/var/cache/organon/%s.conf" % self.pkg_name, "r") as pkg_content:
+			self.pkg_content = pkg_content.read()
+		
+		#convert string to list
+		pkgconfig = self.pkg_content.split()
+		
+		#Find variables and its values
+		version = pkgconfig.index("version")
+		self.version = pkgconfig[version + 2]
+		installer = pkgconfig.index("installer")
+		self.installer = pkgconfig[installer + 2]
+		arch = pkgconfig.index("arch")
+		self.arch = pkgconfig[arch + 2]
+		source = pkgconfig.index("source")
+		self.source = pkgconfig[source + 2]
 
-echo \#\!/bin/bash >> /usr/bin/organon
-echo cd /usr/share/organon >> /usr/bin/organon
-echo exec python organon.py \"\$\@\" >> /usr/bin/organon
-
-chmod +x /usr/bin/organon
-chmod 777 /usr/share/organon
-"""
-	link_template = \
-"""#!/bin/bash
-
-#Copy organon to /usr/share
-cp -R .cache/organon /usr/share
-
-ln -s /usr/share/organon/organon /usr/bin/organon
-"""
-	#Store extension
-	EXT = {
-	"python":"py",
-	"ruby":"rb",
-	"sh":"sh",
-	"php":"php",
-	"perl":"pl",
-	}
-
-	#Store config file
-	pkgconfig = []
-	def __init__(self, INSTRUCTIONS, INSTALLER, INSTALLER_TYPE, TYPE):
-		self.instructions = INSTRUCTIONS
-		self.installer = INSTALLER
-		self.installer_type = INSTALLER_TYPE
-		self.type = TYPE
-
-	def data(self):
-		#open, reads and append config file to list
 		try:
-			with open(pkg_name + ".conf", "r") as f:
-				pkgconfig_file = f.read()
-				pkgconfig.append(pkgconfig_file)
+			Type = pkgconfig.index("type")
+			self.Type = pkgconfig[Type + 2]
+		except ValueError:
+			pass
 
-		except (FileNotFoundError, IOError, OSError):
-			print(red + " [!] " + default + "No tool found on \
-database named [%s]" % pkg_name)
+		#retrieve compile/extraction process
+		process_b = self.pkg_content.find("{")
+		process_e = self.pkg_content.find("}")
+		process = self.pkg_content[process_b + 1:process_e]
+		process = process.split("\n")
+		return(self.source, process, self.version)		
+	def install_deps(self, distro, force_yes):
+		import database
+		
+		db = database.connect(self.ver3)
+		deps = db.dependencies(self.pkg_name, False)
+		
+		if deps != "NULL":
+			if distro == "arch":
+				if force_yes == True:
+					manager = "sudo pacman --needed --noconfirm -S "
+				else:
+					manager = "sudo pacman --needed -S "
+			elif distro == "debian":
+				if force_yes == True:
+					manager = "sudo apt-get -f install "
+				else:
+					manager = "sudo apt-get install "
+			elif distro == "fedora":
+				if force_yes == True:
+					manager = "sudo yum -f install "
+				else:
+					manager = "sudo yum install "
+
+			check_call(manager + deps, shell = True)
+		else:
+			pass
+
+	def make(self, server_pkgname, process):
+		if self.version == "git":
+			check_call("cp -Rf /var/cache/organon/%s /tmp" % \
+			server_pkgname, shell = True)
+
+		elif server_pkgname[-3:] == "rar":
+			check_call("unrar e /var/cache/organon/%s /tmp" % \
+			server_pkgname, shell = True)
+
+		elif server_pkgname[-3:] == "zip":
+			check_call("unzip /var/cache/organon/%s -d /tmp/%s" % \
+			(server_pkgname, self.pkg_name), shell = True)
+
+		elif server_pkgname[-3:] == "run":
+			check_call("sudo chmod +x /var/cache/organon/%s" % \
+			server_pkgname, shell = True)
+			check_call("sudo /var/cache/organon/%s" % server_pkgname, \
+			shell = True)
 			exit()
 
-		#colect data for program compilation and install
-		for variables in pkgconfig:
-			self.type = findall("type = (.*)", variables)[0]
-			self.installer = findall("installer = (.*)", variables)[0]
-			self.installer_type = findall("installer_type = (.*)", variables)[0]
-			self.instructions = variables[variables.find("{") + 1:variables.find("}")]
+		else:
+			check_call("tar -xvf /var/cache/organon/%s -C /tmp" % \
+			server_pkgname, shell = True)
 
-	def script_creator(self):
-		#generates shell script to compile program
+		with open("/tmp/%s.sh" % self.pkg_name, "w") as shell:
+			shell.write("#!/bin/bash\n\n")
+			shell.write("if [ \"%s\" != \"%s\" ]\n" % (server_pkgname, self.pkg_name))
+			shell.write("then\n")
+			shell.write("\tmv /tmp/%s /tmp/%s\n" % (server_pkgname.\
+			replace(".tar.gz", "").\
+			replace(".tar.bz2", "").\
+			replace(".rar", "").\
+			replace(".zip", ""), self.pkg_name))
+			shell.write("else\n\tcontinue\nfi\n")
+			
 
-		with open("process.sh", "w") as process:
-			process.write("\
-#!/bin/bash\n\n\
-#This script is generated by organon\n\
-" + INSTRUCTIONS.replace("\"", "").replace(",", "").replace("\t", "") +
-"#end")
+			shell.write("cd /tmp/%s\n" % self.pkg_name)
+			for command in process:
+				if command == "":
+					pass
+				else:
+					shell.write(str(command) + "\n")
+		check_call("sh /tmp/%s.sh" % self.pkg_name, shell = True)
 
-		check_call("sh process.sh", shell = True)
+	def symlink(self):
+		if self.installer == "none":
+			pass
+		elif self.installer == "script":
+			#Template used to do the install
+			script_template = \
+"""#!/bin/bash
 
-		#Check if program need to be installed manually
-		if "True" in INSTALLER:
-			#Check if its gonna be created a script or a symlink
-			print(INSTALLER_TYPE)
-			with open("install.sh", "w") as script:
-				if "script" in INSTALLER_TYPE:
-					for n in script_template.replace("organon", pkg_name).\
-					replace("python", TYPE).replace("py", EXT[TYPE]):
-						script.write(n)
+#Copy organon to /usr/share
+rm /tmp/pkgname.sh
+sudo cp -R /tmp/pkgname /usr/share/
 
-				elif "link" in INSTALLER_TYPE:
-					for n in link_template.replace("organon", pkg_name):
-						script.write(n)
-			check_call("sudo sh install.sh", shell = True)	
+echo '#!/bin/bash' | sudo tee --append /usr/bin/pkgname
+echo 'cd /usr/share/pkgname' | sudo tee --append /usr/bin/pkgname
+echo 'exec python pkgname.py $@' | sudo tee --append /usr/bin/pkgname
+
+sudo chmod +x /usr/bin/pkgname
+sudo chmod 777 /usr/share/pkgname
+"""
+
+			ext = {
+"python3":"py",
+"python2":"py",
+"python":"py",
+"ruby":"rb",
+"bash":"sh",
+"php":"php",
+"perl":"pl"}
+
+			with open("/tmp/install_%s.sh" % self.pkg_name, "w") as symlink:
+				symlink.write(script_template.replace("pkgname", self.pkg_name)\
+				.replace("python", self.Type).replace(".py", ".%s" % ext[self.Type]))
+
+		elif self.install == "symlink":
+			link_template = \
+"""#!/bin/bash
+
+#Copy organon to /usr/share
+cp -R /tmp/pkgname /usr/share
+
+ln -s /usr/share/pkgname/pkgname* /usr/bin/pkgname
+"""
+
+			with open("/tmp/install_%s.sh" % self.pkg_name, "w") as symlink:
+				symlink.write(link_template)
+		
+		try:
+			check_call("sh /tmp/install_%s.sh" % self.pkg_name, shell = True)
+		except Exception:
+			pass

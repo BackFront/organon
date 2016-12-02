@@ -2,8 +2,6 @@
 #coding=utf-8
 
 __AUTHOR__	= "Fnkoc"
-__VERSION__	= "0.2.1"
-__DATE__	= "13/10/2015"
 
 """
 	Copyright (C) 2015  Franco Colombino
@@ -21,10 +19,13 @@ __DATE__	= "13/10/2015"
 	(https://github.com/fnk0c/organon)
 """
 
-import os
 import database		#Retrieve database data
 import retrieve		#Retrieve source files and pkgconfig
+import abdala
+import update
 from colors import *
+from subprocess import check_call
+from os import listdir
 
 class actions(object):
 	def __init__(self, ver3, distro, arch):
@@ -33,24 +34,18 @@ class actions(object):
 		self.arch = arch
 
 	# UPDATE ORGANON ###########################################################
-	def update(self):
-		print(colors.green + "[+] Updating Organon" + colors.default)
-		up = os.system("git fetch && git pull")
+	def update_organon(self):
+		up = update.xereca(self.ver3).organon()
 
-		if up != 0:
-			print(" [-] Couldn\'t retrieve update. Please download the latest \
-version from https://github.com/fnk0c/organon")
-		else:
-			print(" [+] Organon was successfully updated")
+	def update_packages(self):
+		up = update.xereca(self.ver3).tools()
 
-	#CHECK IF PATH IS /USR/SHARE/ORGANON
-	#THIS CHECK HAPPENS BECAUSE WHEN YOU RUN ./INSTALL.SH THE SCRIPT IS MOVED 
-	#TO /USR/SHARE/. INSTALL.SH ALSO INSTALL ALL DEPENDENCIES NEEDED, CREATE 
-	#THE SYMBOLICS LINKS AND .cache DIRECTORY
 	def check_install(self):
-#		if self.ver3 == True:
-		try: raw_input
-		except: raw_input = input
+		#CHECK IF PATH IS /USR/SHARE/ORGANON
+		import os
+		
+		if self.ver3 == True:
+			raw_input = input
 
 		if os.getcwd() != "/usr/share/organon":
 			from time import sleep
@@ -69,17 +64,22 @@ to install dependencies and configure Organon" + default)
 			else:
 				exit()
 
-	def install(self, pkgs):
+	def install(self, pkgs, force_yes):
 		#PYTHON 2 AND 3 SUPPORT
-		if self.ver3 == False:
-			pass
-		elif self.ver3 == True:
+		if self.ver3 == True:
 			raw_input = input
 
-		#RESUME ACTIONS TO BE DONE
-		print("\n Packages (" + str(len(pkgs)) + ") " + " ".join(pkgs))
-		choice = raw_input("\n %s[+]%s Continue the installation? [Y/n] " % \
-		(green, default)).lower()
+		if force_yes != True:
+			# RESUME ACTIONS TO BE DONE
+			try:
+				print("\n Packages (" + str(len(pkgs)) + ") " + " ".join(pkgs))
+				choice = raw_input("\n %s[+]%s Continue the installation? [Y/n] " % \
+				(green, default)).lower()
+			except KeyboardInterrupt:
+				print(" [-] Aborted")
+				exit()
+		else:
+			choice = "y"
 
 		# CHECK IF USER WANT TO CONTINUE
 		if choice != "y" and len(choice) != 0:
@@ -88,91 +88,72 @@ to install dependencies and configure Organon" + default)
 		elif choice == "y" or len(choice) == 0:
 			for package in pkgs:
 				# CHECK IF ALREADY INSTALLED
-				if package in os.listdir("/usr/bin"):
+				if package in listdir("/usr/bin"):
 					print(" [!] %s already installed" % package)
-				elif package in os.listdir("/usr/local/bin"):
+				elif package in listdir("/usr/local/bin"):
 					print(" [!] %s already installed" % package)
 				else:
 					#call module responsable to download package
-					down = retrieve.download(package, self.distro, self.arch)
+					down = retrieve.download(package, self.distro, self.arch, self.ver3)
 					#define server to be used
 					down.get_mirror()
 					#download source em pkgconfig
-					down.get_files()
-						
+					server_pkgname = down.pkgconfig()
+					install = retrieve.install(package, self.ver3)
+					s = install.read()
+					down.source(s[0])
+					install.install_deps(self.distro, force_yes)
+					install.make(server_pkgname, s[1])
+					install.symlink()
 
-	def uninstall(self, pkgs, config, dep):
+					add2installed = abdala.local(self.ver3)
+					itens = add2installed.listing()
+					add2installed.add(package, s[2], itens)
+
+	def uninstall(self, pkgs, config, dep, force_yes):
 		if self.ver3 == True:
 			raw_input = input
 
-		print("\n Packages (" + str(len(pkgs)) + ") " + " ".join(pkgs))
-		choice = raw_input("\n [+] Remove these packages? [Y/n] ").lower()
+		if force_yes != True:
+			try:
+				print("\n Packages (" + str(len(pkgs)) + ") " + " ".join(pkgs))
+				choice = raw_input("\n [+] Remove these packages? [Y/n] ").lower()
+			except KeyboardInterrupt:
+				print("\n [-] Aborted")
+				exit()
+		else:
+			choice = "y"
 
 		# CHECK IF USER WANT TO CONTINUE #######################################
 		if choice != "y" and len(choice) != 0:
 			print(" [-] Aborted")
 			exit()
 
-		else:
+		elif choice == "y" or len(choice) == 0:
 			# REMOVE PROCESS ###################################################
+			import cleaner
+
+			u = cleaner.uninstall(config, dep, self.ver3)
 			for package in pkgs:
-				print(" [+] Deleting %s source files..." \
-% package)
-				try:
-					if package in os.listdir("/usr/share"):
-						os.system("sudo rm -rf /usr/share/%s" % package)
-					elif package in os.listdir("/usr/local/share"):
-						os.system("sudo rm -rf /usr/local/share/%s" % package)
-					elif package in os.listdir("/opt"):
-						os.system("sudo rm -rf /opt/%s" % package)
-					elif package in os.listdir("/usr/bin"):
-						os.system("sudo rm -rf /usr/bin/%s" % package)
-					else:
-						print(" [-] %s doesn\'t seem to be installed" % package)
-				except Exception as e:
-					print(e)
+				u.pkg(package, self.distro)
 
-				print(" [+] Deleting symlink...")
-				try:
-					if package in os.listdir("/usr/bin"):
-						os.system("sudo rm -rf /usr/bin/%s" % package)
-					elif package in os.listdir("/usr/local/bin"):
-						os.system("sudo rm -rf /usr/local/bin/%s" % package)
-				except Exception as e:
-					print(e)
+				add2installed = abdala.local(self.ver3)
+				add2installed.remove(package)
 
-				if config == True:
-					if package in os.listdir("/etc/"):
-						print(" [+] Removing configuration files...")
-						os.system("sudo rm -rf /etc/%s" % package)
-					else:
-						print(" [!] No configuration file found")
-
-				if dep == True:
-					print(" [+] Removing dependencies...")
+	def sync_db(self):
+		sync = retrieve.download(None, self.distro, self.arch, self.ver3)
+		sync.get_mirror()
+		sync.sync()
 
 	def enum_db(self):
-		#Since organon is hosted on a Dynamic IP server. We need to get its
-		#IP address everytime we run it
-		db = database.connect("http://organon.ddns.net", self.ver3)
-		db.ip_retriever()
-		db.MySQL("SELECT nome, versao, descricao FROM %s" % self.distro)
+		database.connect(self.ver3).listing()
 
 	def search_db(self, keyword):
-		query = ("\
-SELECT * FROM table WHERE \
-(CONVERT( nome USING utf8 ) \
-LIKE '%create%' OR \
-CONVERT( versao USING utf8 ) \
-LIKE '%create%' OR \
-CONVERT( descricao USING utf8) \
-LIKE '%create%' OR \
-CONVERT( url USING utf8 ) \
-LIKE '%create%' OR \
-CONVERT( dependencias  USING utf8 ) \
-LIKE '%create%') LIMIT 0, 30").replace("create", keyword).replace("table", self.distro)
+		print(green + " [+] " + default + "Searching for: " + keyword)
+		database.connect(self.ver3).search(keyword)
 
-		print(" [+] Searching for: " + keyword)
-		db = database.connect("http://organon.ddns.net", self.ver3)
-		db.ip_retriever()
-		db.MySQL(query)
+	def installed(self):
+		itens = abdala.local(self.ver3).listing()
+		
+		for i in itens:
+			print(i[0] + " ==> " + i[1])

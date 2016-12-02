@@ -2,8 +2,7 @@
 #coding=utf-8
 
 __AUTHOR__	= "Fnkoc"
-__VERSION__	= "0.2.1"
-__DATE__	= "12/10/15"
+__DATE__	= "14/02/2015"
 
 """
 	Copyright (C) 2015  Franco Colombino
@@ -21,69 +20,106 @@ __DATE__	= "12/10/15"
 	(https://github.com/fnk0c/organon)
 """
 
-"""
-This script is responsible to connect with the database and retrieve all the
-needed informations
-"""
-
+import csv
 from colors import *
 
 class connect(object):
-	def __init__(self, host, ver3):
-		self.host = host
+	def __init__(self, ver3):
 		self.ver3 = ver3
 
-	def ip_retriever(self):
-		def __init__(self):
-			self.ip = ip
-		#lib to parse html
-		from bs4 import BeautifulSoup
-		
-		#Python 3 support
+	def listing(self):
 		if self.ver3 == True:
-			import urllib.request as u
-		#Python 2 support
-		elif self.ver3 == False:
-			import urllib as u
-
-		#Download HTML
-		con = u.urlopen(self.host)
-		html = con.read()
-
-		### - Parse HTML - ###
-		soup = BeautifulSoup(html, "lxml")
-		for l in soup.findAll("link"):
-			ip = l.get("href")
-
-		ip = ip.split(":")
-		self.ip = (ip[1].replace("/", ""))
-
-	def MySQL(self, query):
-		import pymysql as sql
-
-		#Database credentials
-		userdb 	= "organonuser"
-		passwd 	= "organon"
-		db		= "organon"
+			exception = FileNotFoundError
+		else:
+			exception = IOError
 
 		try:
-			con = sql.connect(self.ip, userdb, passwd, db)
-			cur = con.cursor()
-			cur.execute(query)
+			with open("/etc/organon/tools.db", "r") as csvfile:
+				csvcontent = csv.reader(csvfile, delimiter=";")
 
-			for row in cur:
-				for i in row[::3]:
-					package = str(i)
-				for i in row[1::3]:
-					version = str(i)
-				for i in row[2::3]:
-					description = str(i)
-			
-				print("%s%s%s | v%s%s%s\n\n  %s\n" % (green, package, default, \
-				yellow, version, default,description))
-		except sql.Error as e:
-			print(e)
-			exit()
-		finally:
-			if con:
-				con.close()
+				for row in csvcontent:
+					print(green + " [+] " + row[0] + yellow + " v " + row[1] + default)
+					print(row[4] + "\n")
+
+		except exception:
+			print(red + " [!] " + default + "No database found! Use \"organon\
+ -S\" to sync with our servers")
+
+	def search(self, keyword):
+		if self.ver3 == True:
+			exception = FileNotFoundError
+		else:
+			exception = IOError
+		try:
+			with open("/etc/organon/tools.db", "r") as csvfile:
+				csvcontent = csv.reader(csvfile, delimiter=";")
+
+				for row in csvcontent:
+					#The following convert to lower case
+					#reference link: http://stackoverflow.com/questions/8265648/using-the-lowercase-function-with-csv-rows
+					row = ([r.lower() for r in row])
+					if keyword in row[0]:
+						print(green + " [+] " + row[0] + yellow + " v " + row[1]\
+						 + default)
+						print(row[4] + "\n")
+					elif keyword in row[1]:
+						print(green + " [+] " + row[0] + yellow + " v " + row[1]\
+						 + default)
+						print(row[4] + "\n")
+					elif keyword in row[2]:
+						print(green + " [+] " + row[0] + yellow + " v " + row[1]\
+						 + default)
+						print(row[4] + "\n")
+					elif keyword in row[3]:
+						print(green + " [+] " + row[0] + yellow + " v " + row[1]\
+						 + default)
+						print(row[4] + "\n")
+					elif keyword in row[4]:
+						print(green + " [+] " + row[0] + yellow + " v " + row[1]\
+						 + default)
+						print(row[4] + "\n")
+		except exception:
+			print(red + " [!] " + default + "No database found! Use \"organon\
+ -S\" to sync with our servers")
+
+	def dependencies(self, package, version):
+		if self.ver3 == True:
+			exception = FileNotFoundError
+		else:
+			exception = IOError
+
+		try:
+			with open("/etc/organon/tools.db", "r") as csvfile:
+				csvcontent = csv.reader(csvfile, delimiter=";")
+
+				for row in csvcontent:
+					if package in row[0]:
+						if version == True:
+							version = str(row[1])
+							return(version)
+						else:
+							deps = str(row[3])
+							return(deps)
+
+		except exception:
+			print(red + " [!] " + default + "No database found! Use \"organon\
+ -S\" to sync with our servers")
+
+	def server_pkgname(self, package):
+			if self.ver3 == True:
+				exception = FileNotFoundError
+			else:
+				exception = IOError
+
+			try:
+				with open("/etc/organon/tools.db", "r") as csvfile:
+					csvcontent = csv.reader(csvfile, delimiter=";")
+
+					for row in csvcontent:
+						if package in row[0]:
+							name = str(row[2])
+							return(name)
+
+			except exception:
+				print(red + " [!] " + default + "No database found! Use \"organon\
+ -S\" to sync with our servers")

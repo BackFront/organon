@@ -2,8 +2,8 @@
 #coding=utf-8
 
 __AUTHOR__	= "Fnkoc"
-__VERSION__	= "0.2.1"
-__DATE__	= "30/10/2015"
+__VERSION__	= "0.2.7"
+__DATE__	= "31/07/2016"
 
 """
 	Copyright (C) 2015  Franco Colombino
@@ -24,6 +24,7 @@ __DATE__	= "30/10/2015"
 from sys import path, argv, version
 from os import system
 import argparse
+
 path.append("src/")
 import atom
 from colors import *
@@ -52,18 +53,26 @@ parser.add_argument("-i", nargs = "+",
 	help = "Install packages")
 parser.add_argument("-r", nargs = "+",
 	help = "Remove packages")
-parser.add_argument("--dependencies", action = "store_true",
+parser.add_argument("--deps", action = "store_true",
 	help = "Remove dependencies (use with -r)")
-parser.add_argument("--config", action = "store_true",
+parser.add_argument("--conf", action = "store_true",
 	help = "Remove configuration files (use with -r)")
-parser.add_argument("-u", action = "store_true",
+parser.add_argument("-U", action = "store_true",
 	help = "Update Organon")
+parser.add_argument("-u", action = "store_true",
+	help = "Update packages")
+parser.add_argument("-S", action = "store_true",
+	help = "Synchronize database")
 parser.add_argument("-s",
-	help = "Search for package")
-parser.add_argument("-l", action = "store_true",
+	help = "Search for packages")
+parser.add_argument("-L", action = "store_true",
 	help = "List all packages available")
 parser.add_argument("--clean", action = "store_true",
 	help = "Clean Organon\'s cache")
+parser.add_argument("--yes", action = "store_true",
+	help = "Assume yes to all questions")
+parser.add_argument("-Li", action = "store_true",
+	help = argparse.SUPPRESS)
 
 args = parser.parse_args()
 
@@ -84,7 +93,7 @@ def main():
 	core = atom.actions(ver3, distro, arch)
 
 	#Check if organon is correctly installed
-#	core.check_install()
+	#core.check_install()
 	
 	### - OPEN MAN PAGE - ###
 	if args.about:
@@ -95,39 +104,56 @@ def main():
 		print("Version: ", __VERSION__)
 		print("Last revision", __DATE__)
 
+	### - CLEAN ORGANON CACHE - ###
+	if args.clean:
+		print(" [!] Cleaning cache")
+		system("sudo rm -rf /var/cache/organon/*")
+
 	### - UPDATE ORGANON - ###
+	if args.U:
+		core.update_organon()
+
+	### - UPDATE PACKAGES - ###
 	if args.u:
-		core.update()
+		core.update_packages()
 
 	### - INSTALL PROGRAM - ###
 	elif args.i:
-		core.install(args.i)
+		core.install(args.i, args.yes)
 
 	### - REMOVE PROGRAM - ###
 	elif args.r:
-		config = False
+		conf = False
 		deps = False
-		if args.config == True and args.dependencies == True:
-			config = True
+		if args.conf == True and args.deps == True:
+			conf = True
 			deps = True
 
-		elif args.config == True and args.dependencies == False:
-			config = True
+		elif args.conf == True and args.deps == False:
+			conf = True
 			deps = False
 
-		elif args.config == False and args.dependencies == True:
-			config = False
+		elif args.conf == False and args.deps == True:
+			conf = False
 			deps = True
 
-		core.uninstall(args.r, config, deps)
+		core.uninstall(args.r, conf, deps, args.yes)
 
-	### - LISTA DATABASE - ###
-	elif args.l:
-		core.enum_db()
+	### - SYNCHRONIZE DATABASE - ###
+	elif args.S:
+		core.sync_db()
 
 	### - SEARCH IN DATABASE - ###
 	elif args.s:
 		core.search_db(args.s)
+
+	### - LIST DATABASE - ###
+	elif args.L:
+		core.enum_db()
+	
+	### - LIST INSTALLED TOOLS - ###
+	elif args.Li:
+		core.installed()
 
 if __name__ == "__main__":
 	if len(argv) == 1:
@@ -135,9 +161,23 @@ if __name__ == "__main__":
 		print(banner)
 		parser.print_help()
 	else:
-		with open("/etc/organon/organon.conf", "r") as conf:
-			conf = conf.readlines()
-			distro = conf[0].split("=")[1].replace("\n", "").replace(" ", "")
-			arch = conf[1].split("=")[1].replace("\n", "").replace(" ", "")
+		try:
+			with open("/etc/organon/organon.conf", "r") as conf:
+				conf = conf.readlines()
+				distro = conf[0].split("=")[1].replace("\n", "").replace(" ", "")
+				arch = conf[1].split("=")[1].replace("\n", "").replace(" ", "")
+		except FileNotFoundError:
+			print(" [!] No configuration file found (/etc/organon/organon.conf")
+			print("Did you installed organon?")
+			print("python setup.py install")
+			exit()
 		py_version()
-		main()
+		
+		try:
+			main()
+		except KeyboardInterrupt:
+			print(red + "\n\n [!] User aborted" + default)
+			exit()
+		except Exception as e:
+			print(red + str(e) + default)
+			raise(e)

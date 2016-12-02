@@ -2,85 +2,102 @@
 
 This program focuses on automating the download, installation and compilation of pentest tools from source
 
-# ATTENTION!
-
-## ** This tool is no longer working! Server is down ** .
-
 Tool developed for Linux systems (APT and Pacman)
 
 Authors:
 --------
-* [Franco Colombino (Fnkoc)](https://github.com/fnk0c)
-* [Ygor Máximo (Maximoz)](https://github.com/maximozsec)
+* [Franco Colombino (Fnkoc)](https://github.com/fnk0c)  
+***Special thanks to [Ygor Máximo (Maximoz)](https://github.com/maximozsec) for support on the beginning***
 
 Requirements
 -------------
 1. Python >=2.7 or >=3.4    
-2. python-pymysql
-3. python-BeautifulSoup
-4. python-lxml
-5. python-wget
-6. GNU/Linux system based on Debian and Arch
+2. GNU/Linux system based on Debian and Arch
 
 Install
 -------
 	git clone https://github.com/fnk0c/organon.git
 	cd organon
-	./install.sh
+	python setup.py install
 
-[With screenshot](http://organon.ddns.net/install)
+[With screenshot](https://projetos.cienciahacker.ch/organon/install/install.html)
 
 Tested on:
 ----------
-* Ubuntu 14.04  
-* Ubuntu 14.10  
-* Ubuntu 15.04  
-* Debian 7.8 Wheezy
-* Debian 8 Jessie
-* Elementary OS Luna
-* Linux Mint 17.1
-* Manjaro (Unstable)
+* Arch Linux
+* Manjaro
+* Debian 8
+* Apricity OS 1.4
 
 Screenshot
 ----------
-![Screenshot](https://i.imgur.com/mAKhkRC.png)
+![Screenshot](http://i.imgur.com/xjBVGMG.png)
 
 Help
 ----
-	usage: organon.py [-h] [-a] [-v] [-i I [I ...]] [-r R [R ...]]
-                  [--dependencies] [--config] [-u] [-s S] [-l] [--clean]
+```
+usage: organon [-h] [-a] [-v] [-i I [I ...]] [-r R [R ...]] [--deps] [--conf]
+               [-U] [-u] [-S] [-s S] [-L] [--clean] [--yes]
 
-	Package manager that focus on Pentest tools
+Package manager that focus on Pentest tools
 
-	optional arguments:
-	  -h, --help      show this help message and exit
-	  -a, --about     About this tool
-	  -v, --version   Show version and exit
-	  -i I [I ...]    Install packages
-	  -r R [R ...]    Remove packages
-	  --dependencies  Remove dependencies (use with -r)
-	  --config        Remove configuration files (use with -r)
-	  -u              Update Organon
-	  -s S            Search for package
-	  -l              List all packages available
-	  --clean         Clean Organon's cache
+optional arguments:
+  -h, --help     show this help message and exit
+  -a, --about    About this tool
+  -v, --version  Show version and exit
+  -i I [I ...]   Install packages
+  -r R [R ...]   Remove packages
+  --deps         Remove dependencies (use with -r)
+  --conf         Remove configuration files (use with -r)
+  -U             Update Organon
+  -u             Update packages
+  -S             Synchronize database
+  -s S           Search for packages
+  -L             List all packages available
+  --clean        Clean Organon's cache
+  --yes          Assume yes to all questions
 
-	* Listing available tools  
-	        organon -l  
-	* Searching for tools  
-	        organon -s <package>
-	* Installing tool  
-	        organon -i <package> <package>
-	* Update Organon  
-	        organon -u
-	* Remove tool
-	        organon -r <package> <package>  
-	* Remove tool and its dependencies and configuration files
-	        organon -r <package> <package> --dependencies --config  
-	* Clean .cache directory
-	        organon --clean 
-	* Current Version
-	        organon -v
+
+organon -h
+	Shows help
+
+organon -a
+	Shows MAN file
+
+organon -v 
+	Shows version
+
+organon -i [PACKAGE]
+	Install an specific package
+
+organon -r [PACKAGE]
+  Remove an specific package
+  --dependencies
+  	Remove package dependencies
+	--config
+		Remove package configuration files
+
+organon -U
+	Search and download updates for Organon
+
+organon -u
+	Search and download updates for installed packages
+
+organon -S [PACKAGE]
+	Synchronizes database between server and client
+
+organon -s [PACKAGE]
+	Search for an specific package
+
+organon -L
+	Lists all the availables tools to install
+
+organon -Li
+	List all tools already installed
+
+organon --clean
+	Clean /var/cache/organon directory
+```
 
 BUGS
 ----
@@ -91,34 +108,3 @@ Since it's still on development phase bugs are expected. Please, **report to us!
 Be Part of development
 ----------------------
 Send us a message on facebook
-
-About current version
----------------------
-#### `v0.2.1`
-- All features from previous versions + review of the code  
- - Installation script re-wrote and optimized  
- - Remove ruby  
- - All scripts are made in python  
-
-About previous version
----------------------
-#### `v0.2.0`
-- **Goal**
- - Install tools and its dependences from a MySQL database
-
-- **MySQL**
- - Server version: 5.5.41-0+wheezy1 (Debian)
-
- - Ruby code to connect to the database (depreciated)
-
- - Python script to execute the SQL commands and run the program
-
-- **PKGCONFIG**
- - The installation scripts were replaced by pkgconfig files, similar to pacman pkgbuild. These files are hosted on the organon server.
-
-- **Arch Linux support**
- - Organon now supports Arch and Debian linux  
-
-- **Improvements on Install and Remove functions**
- - * Check if already installed
- - * When uninstalling, Organon check for the tool and diferent directorys (/usr/share || /usr/local/share || /opt)
